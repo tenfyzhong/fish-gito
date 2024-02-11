@@ -11,31 +11,32 @@ function gito --description "Open repo in browser"
         return 0
     end
 
-    set -l gitdir "$(git rev-parse --git-dir 2>/dev/null)"
+    set -l gitdir (git rev-parse --git-dir 2>/dev/null)
     if test -z $gitdir
         echo "fatal: Not a git repository" >&2
-        return 1
+        return 2
     end
 
     set -f branch $_flag_branch
     if test -z $branch
-        set -f branch "$(git rev-parse --abbrev-ref HEAD)"
+        set -f branch (git rev-parse --abbrev-ref HEAD)
     end
 
     if test -z $branch
         echo "fatal: Not a git repository" >&2
-        return 1
+        return 3
     end
 
-    set -l remote_name "$(git config --get branch.$branch.remote)"
+    set -l remote_name (git config --get branch.$branch.remote)
     if test -z $remote_name
-        echo "fatal: No such remote $remote_name" >&2
-        return 1
+        echo "fatal: No such remote $branch" >&2
+        return 4
     end
 
-    set remote $(git remote get-url $remote_name)
+    set remote (git remote get-url $remote_name)
     if test -z $remote
         echo "fatal: No such remote $remote_name" >&2
+        return 5
     end
 
     set remote $(string replace -r 'ssh:\/\/git@([^/]+)' 'https:\/\/$1' $remote)
@@ -51,11 +52,12 @@ function gito --description "Open repo in browser"
         end
 
         if test -n $file
-            set -l path $(realpath $file 2>/dev/null)
-            set -l gitroot $(git rev-parse --show-toplevel)
-            set -l rootlen $(string length $gitroot)
-            set -l rootlen $(math $rootlen + 1)
-            set -l relative $(string sub -s $rootlen $path)
+            set -l path (realpath $file 2>/dev/null)
+            set -l gitroot (git rev-parse --show-toplevel)
+            set -l gitroot (realpath $gitroot)
+            set -l rootlen (string length $gitroot)
+            set -l rootlen (math $rootlen + 1)
+            set -l relative (string sub -s $rootlen $path)
             set -l line ''
             if test -n $_flag_file
                 set line (_gito_line_param --host $remote $_flag_line)
@@ -81,7 +83,7 @@ function _gito_help
         '  -e/--echo              echo the result only, do not open it' \
         '  -r/--root              open root path' \
         '  -f/--file   <FILE>     file path' \
-        '  -l/--line   <LINE...>  line number' \
+        '  -l/--line   <LINE...>  line number, support range begin and end' \
         '  -h/--help              print this help message'
 end
 
@@ -116,6 +118,18 @@ function _gito_line_param
 
     set -l beg $argv[1]
     set -l end $argv[2]
+
+    if test $beg -eq $end
+        echo "#L$argv[1]"
+        return 0
+    end
+
+    if test $beg -gt $end
+        set -l t $beg
+        set beg $end
+        set end $t
+    end
+
     set -l delim (_gito_line_delim --host $_flag_host)
     echo -n "#L$beg$delim$end"
 end
