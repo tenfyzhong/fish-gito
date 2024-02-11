@@ -23,6 +23,7 @@ function git
             echo '  origin/main'
             echo '  origin/init'
             echo '  origin/branchv2'
+            echo '  upstream/zzz/branchv2'
     end
 end
 
@@ -215,7 +216,8 @@ demock_git
 
 @test 'complete -b' (complete -C 'gito -b ' | string collect) = 'branchv2	the branch to open
 init	the branch to open
-main	the branch to open'
+main	the branch to open
+zzz/branchv2	the branch to open'
 
 touch filr.txt
 @test 'complete -f ' (complete -C 'gito -f ' | string collect) = 'file.txt
