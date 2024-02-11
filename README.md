@@ -1,5 +1,6 @@
 # fish-gito
 [![GitHub tag](https://img.shields.io/github/tag/tenfyzhong/fish-gito.svg)](https://github.com/tenfyzhong/fish-gito/tags)
+[![CI](https://github.com/tenfyzhong/fish-gito/actions/workflows/test.yml/badge.svg)](https://github.com/tenfyzhong/fish-gito/actions/workflows/test.yml)
 
 Open repo  in browser
 
